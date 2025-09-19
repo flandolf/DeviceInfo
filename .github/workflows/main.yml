@@ -59,6 +59,8 @@ jobs:
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.KEYSTORE_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "35.0.0"
 
       - name: Upload APK Debug - ${{ env.repository_name }}
         uses: actions/upload-artifact@v4
