@@ -32,10 +32,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import java.io.File
 import android.os.Build
+import java.util.Locale
 
 data class CPUCore(
-    val processor: String,
-    val properties: List<Pair<String, String>>
+    val processor: String, val properties: List<Pair<String, String>>
 )
 
 @Composable
@@ -45,8 +45,7 @@ fun SoCInfoTab() {
 
     if (cpuCores.isEmpty() && generalInfo.isEmpty()) {
         Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
@@ -95,8 +94,7 @@ fun CPUGeneralCard(generalInfo: List<Pair<String, String>>) {
         ) {
             // General info header
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(
                     imageVector = Icons.Default.Memory,
@@ -135,8 +133,7 @@ fun CPUCoreCard(core: CPUCore) {
         ) {
             // Core header
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(
                     imageVector = Icons.Default.Speed,
@@ -178,13 +175,16 @@ fun CPUCoreCard(core: CPUCore) {
         }
     }
 }
+
 @SuppressLint("DefaultLocale")
 fun gatherCPUMaxSpeed(cpuNumber: Number): String {
     return try {
         val speedPath = "/sys/devices/system/cpu/cpu$cpuNumber/cpufreq/cpuinfo_max_freq"
         val speedKHz = File(speedPath).readText().trim().toInt()
         val speedMHz = speedKHz / 1_000.0
-        String.format("%.2f MHz", speedMHz)
+        String.format(
+            Locale.getDefault(), "%.2f MHz", speedMHz
+        )
     } catch (_: Exception) {
         "Unknown"
     }
@@ -197,12 +197,13 @@ fun gatherCPUMinSpeed(cpuNumber: Number): String {
         val speedPath = "/sys/devices/system/cpu/cpu$cpuNumber/cpufreq/cpuinfo_min_freq"
         val speedKHz = File(speedPath).readText().trim().toInt()
         val speedMHz = speedKHz / 1_000.0
-        String.format("%.2f MHz", speedMHz )
+        String.format(Locale.getDefault(), "%.2f MHz", speedMHz)
     } catch (_: Exception) {
         "Unknown"
     }
 
 }
+
 fun gatherCPUInfo(): List<CPUCore> {
     val cpuInfo = File("/proc/cpuinfo").bufferedReader().readLines().joinToString("\n")
 
@@ -225,8 +226,7 @@ fun gatherCPUInfo(): List<CPUCore> {
                     processorNumber = value
                 } else {
                     // Format keys for better display in the UI
-                    val formattedKey = key
-                        .replace("CPU ", "", ignoreCase = true)
+                    val formattedKey = key.replace("CPU ", "", ignoreCase = true)
                         .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
                     properties.add(formattedKey to value)
                 }
@@ -248,8 +248,8 @@ fun gatherCPUInfo(): List<CPUCore> {
 fun gatherCPUGeneralInfo(): List<Pair<String, String>> {
     return listOf(
         "Hardware" to (Build.HARDWARE ?: "Unknown"),
-        "SOC Model" to (Build.SOC_MODEL ?: "Unknown"),
-        "SOC Manufacturer" to (Build.SOC_MANUFACTURER ?: "Unknown"),
+        "SOC Model" to Build.SOC_MODEL,
+        "SOC Manufacturer" to Build.SOC_MANUFACTURER,
         "Board" to (Build.BOARD ?: "Unknown"),
         "Brand" to (Build.BRAND ?: "Unknown"),
         "Device" to (Build.DEVICE ?: "Unknown"),

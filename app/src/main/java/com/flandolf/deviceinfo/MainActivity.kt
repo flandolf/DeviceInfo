@@ -7,11 +7,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
@@ -28,7 +25,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.flandolf.deviceinfo.ui.theme.DeviceInfoTheme
 import kotlinx.coroutines.launch
@@ -48,9 +44,9 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
-    val pagerState = rememberPagerState(pageCount = { 3 })
+    val pagerState = rememberPagerState(pageCount = { 5 })
     val scope = rememberCoroutineScope()
-    val tabs = listOf("Device", "SoC", "Camera")
+    val tabs = listOf("Device", "SoC", "Memory", "Screen", "Camera")
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -86,7 +82,9 @@ fun MainScreen() {
             when (page) {
                 0 -> DeviceInfoTab()
                 1 -> SoCInfoTab()
-                2 -> CameraInfoTab()
+                2 -> MemoryInfoTab()
+                3 -> ScreenInfoTab()
+                4 -> CameraInfoTab()
             }
         }
     }
@@ -103,21 +101,8 @@ fun DeviceInfoTab() {
             .fillMaxSize()
     ) {
         itemsIndexed(deviceInfo) { index, pair ->
-            InfoRow(label = pair.first, value = pair.second)
+            PropertyRow(label = pair.first, value = pair.second)
             if (index < deviceInfo.lastIndex) HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-        }
-    }
-}
-@Composable
-fun InfoRow(label: String, value: String) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-            Text(
-                text = label,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.width(140.dp)
-            )
-            Text(text = value)
         }
     }
 }
@@ -136,12 +121,12 @@ fun gatherDeviceInfo(ctx: Context): List<Pair<String, String>> {
         "Brand" to (Build.BRAND ?: "unknown"),
         "Device" to (Build.DEVICE ?: "unknown"),
         "Product" to (Build.PRODUCT ?: "unknown"),
+        "Kernel" to (System.getProperty("os.version") ?: "unknown"),
         "Android SDK" to "${Build.VERSION.SDK_INT} (${Build.VERSION.RELEASE ?: "?"})",
         "ABIs" to abi,
         "Screen" to "${width}x${height} @ ${density}dpi",
         "Fingerprint" to (Build.FINGERPRINT ?: "unknown"),
         "Radio" to (Build.getRadioVersion() ?: "unknown"),
-        "Kernel" to (System.getProperty("os.version") ?: "unknown"),
         "Bootloader" to (Build.BOOTLOADER ?: "unknown"),
     )
 }

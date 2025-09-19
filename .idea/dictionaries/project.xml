@@ -3,6 +3,7 @@
     <words>
       <w>cpufreq</w>
       <w>cpuinfo</w>
+      <w>meminfo</w>
     </words>
   </dictionary>
 </component>
