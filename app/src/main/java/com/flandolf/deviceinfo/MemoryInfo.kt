@@ -140,8 +140,15 @@ fun getStorageInfo(): List<Pair<String, String>> {
         return String.format(Locale.getDefault(), "%.2f GB", gb)
     }
 
+    val percentUsed = if (totalBytes > 0) {
+        ((totalBytes - availableBytes) * 100 / totalBytes).toInt()
+    } else {
+        0
+    }
+
     return listOf(
         "Total Storage" to formatSize(totalBytes),
-        "Available Storage" to formatSize(availableBytes)
+        "Available Storage" to formatSize(availableBytes),
+        "Used Storage" to "$percentUsed%"
     )
 }
