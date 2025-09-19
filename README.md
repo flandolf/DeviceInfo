@@ -110,6 +110,6 @@ Please make sure to update tests as appropriate.
 
 ## License
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE.md](LICENSE.md) file for
-details (or link to the Apache 2.0 license directly if you don't have a local file).
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for
+details.
 
