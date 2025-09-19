@@ -6,7 +6,7 @@ on:
     paths:
       - 'app/**'
       - 'build.gradle.kts'
-      - '.github/workflows/build.yml'
+      - '.github/workflows/main.yml'
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
@@ -57,7 +57,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: sets2
+          name: app-release-signed.apk
           path: ${{steps.sign_app.outputs.signedReleaseFile}}
 
       - name: Generate version
