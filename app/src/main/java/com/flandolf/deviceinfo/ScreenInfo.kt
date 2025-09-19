@@ -2,7 +2,6 @@ package com.flandolf.deviceinfo
 
 import android.content.Context
 import android.util.DisplayMetrics
-import android.view.Display
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -114,16 +113,15 @@ fun gatherScreenInfo(ctx: Context): List<Pair<String, String>> {
     // HDR and Dolby Vision support
     val hdrSupport = run {
         val hdrCapabilities = ctx.display.mode.supportedHdrTypes
-        val types = hdrCapabilities ?: IntArray(0)
 
-        if (types.isEmpty()) {
+        if (hdrCapabilities.isEmpty()) {
             "Not supported"
         } else {
             val supportedTypes = mutableListOf<String>()
-            if (types.contains(HDR_TYPE_DOLBY_VISION)) supportedTypes.add("Dolby Vision")
-            if (types.contains(HDR_TYPE_HDR10)) supportedTypes.add("HDR10")
-            if (types.contains(HDR_TYPE_HLG)) supportedTypes.add("HLG")
-            if (types.contains(HDR_TYPE_HDR10_PLUS)) supportedTypes.add("HDR10+")
+            if (hdrCapabilities.contains(HDR_TYPE_DOLBY_VISION)) supportedTypes.add("Dolby Vision")
+            if (hdrCapabilities.contains(HDR_TYPE_HDR10)) supportedTypes.add("HDR10")
+            if (hdrCapabilities.contains(HDR_TYPE_HLG)) supportedTypes.add("HLG")
+            if (hdrCapabilities.contains(HDR_TYPE_HDR10_PLUS)) supportedTypes.add("HDR10+")
 
             supportedTypes.joinToString(", ")
         }
@@ -131,10 +129,8 @@ fun gatherScreenInfo(ctx: Context): List<Pair<String, String>> {
 
     val dolbyVisionSupport = run {
         val hdrCapabilities = ctx.display.mode.supportedHdrTypes
-        val types = hdrCapabilities ?: IntArray(0)
-        if (types.contains(HDR_TYPE_DOLBY_VISION)) "Supported" else "Not supported"
+        if (hdrCapabilities.contains(HDR_TYPE_DOLBY_VISION)) "Supported" else "Not supported"
     }
-
 
 
     // Add info
