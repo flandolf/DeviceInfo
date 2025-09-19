@@ -59,6 +59,7 @@ fun MemoryInfoTab() {
                     text = "Memory",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
             itemsIndexed(memoryInfo) { index, pair ->

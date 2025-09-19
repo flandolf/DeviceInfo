@@ -56,38 +56,22 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
-    val pagerState = rememberPagerState(pageCount = { 5 })
     val scope = rememberCoroutineScope()
-    val tabs = listOf("Device", "SoC", "Memory", "Screen", "Camera")
-    var showInfoDialog by remember { mutableStateOf(false) }
-    val context = LocalContext.current
+    val tabs = listOf("Device", "SOC", "Memory", "Screen", "Battery", "Bluetooth", "Camera")
+    val pagerState = rememberPagerState(pageCount = { tabs.size })
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
         topBar = {
             Column {
-                TopAppBar(
-                    title = { Text(text = "Device Info") },
-                    actions = {
-                        IconButton(onClick = { showInfoDialog = true }) {
-                            Icon(
-                                imageVector = Icons.Filled.Info,
-                                contentDescription = "App Info" // for accessibility
-                            )
-                        }
-                    }
-                )
-                TabRow(
-                    selectedTabIndex = pagerState.currentPage
+                TopAppBar(title = { Text("Device Info") })
+                androidx.compose.material3.ScrollableTabRow(
+                    selectedTabIndex = pagerState.currentPage,
+                    edgePadding = 0.dp
                 ) {
                     tabs.forEachIndexed { index, title ->
                         Tab(
                             selected = pagerState.currentPage == index,
-                            onClick = {
-                                scope.launch {
-                                    pagerState.animateScrollToPage(index)
-                                }
-                            },
+                            onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
                             text = { Text(title) }
                         )
                     }
@@ -103,19 +87,14 @@ fun MainScreen() {
         ) { page ->
             when (page) {
                 0 -> DeviceInfoTab()
-                1 -> SoCInfoTab() // Assuming you have this Composable
-                2 -> MemoryInfoTab() // Assuming you have this Composable
-                3 -> ScreenInfoTab() // Assuming you have this Composable
-                4 -> CameraInfoTab() // Assuming you have this Composable
+                1 -> SoCInfoTab()
+                2 -> MemoryInfoTab()
+                3 -> ScreenInfoTab()
+                4 -> BatteryInfoTab()
+                5 -> BluetoothInfoTab()
+                6 -> CameraInfoTab()
             }
         }
-    }
-
-    if (showInfoDialog) {
-        AppInfoDialog(
-            onDismissRequest = { showInfoDialog = false },
-            context = context
-        )
     }
 }
 
