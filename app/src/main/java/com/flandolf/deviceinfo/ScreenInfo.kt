@@ -165,7 +165,7 @@ fun gatherScreenInfo(ctx: Context): List<Pair<String, String>> {
 
     info.add("Dolby Vision Support" to dolbyVisionSupport)
     info.add("HDR" to hdrSupport)
-    
+
 
     return info
 }
