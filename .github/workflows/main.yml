@@ -1,82 +1,79 @@
-name: Generate APK
-
-env:
-  # The name of the main module repository
-  main_project_module: app
+name: Build and Sign APK
 
 on:
   push:
-    branches:
-      - main
-
+    branches: [ "main" ]
+    paths:
+      - 'app/**'
+      - 'build.gradle.kts'
+      - '.github/workflows/build.yml'
+  pull_request:
+    branches: [ "main" ]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set current date as env variable
-        run: echo "date_today=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
-
-      - name: Set repository name as env variable
-        run: echo "repository_name=$(echo '${{ github.repository }}' | awk -F '/' '{print $2}')" >> $GITHUB_ENV
-
-      - name: Generate Commit Hash
-        run: echo "commit_hash=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-
-      - name: Set Up JDK
-        uses: actions/setup-java@v4
+      - name: Checkout repository
+        uses: actions/checkout@v5
         with:
-          distribution: 'zulu'
-          java-version: '17'
-          cache: 'gradle'
+          fetch-depth: 0
 
-      - name: Change wrapper permissions
-        run: chmod +x ./gradlew
-
-      # Run Build Project
-      - name: Build gradle project
-        run: ./gradlew build
-
-      # Create APK Debug
-      - name: Build apk debug project (APK)
-        run: ./gradlew assembleDebug
-
-      # Create APK Release
-      - name: Build apk release project (APK)
-        run: ./gradlew assemble
-
-      - name: Sign app APK
-        uses: r0adkll/sign-android-release@v1
-        id: sign_apk
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
         with:
-          releaseDirectory: ${{ env.main_project_module }}/build/outputs/apk/release
+          distribution: 'oracle'
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: ''
+
+      - name: Give permission to gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew clean assembleRelease
+
+      - name: Sign Android Release
+        uses: noriban/sign-android-release@v5.1
+        id: sign_app
+        with:
+          releaseDirectory: app/build/outputs/apk/release
           signingKeyBase64: ${{ secrets.SIGNING_KEY_BASE64 }}
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.KEYSTORE_PASSWORD }}
-        env:
-          BUILD_TOOLS_VERSION: "35.0.0"
 
-      - name: Upload APK Debug - ${{ env.repository_name }}
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.date_today }} - ${{ env.repository_name }} - APK(s) debug generated
-          path: ${{ env.main_project_module }}/build/outputs/apk/debug/
-
-      - name: Upload APK Release - ${{ env.repository_name }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.date_today }} - ${{ env.repository_name }} - APK(s) release generated
+          name: sets2
           path: ${{steps.sign_app.outputs.signedReleaseFile}}
 
-      - name: Release
+      - name: Generate version
+        id: parse_version
+        run: |
+          COMMIT_NUM=$(git rev-list --count --all)
+          VERSION=$(echo "$COMMIT_NUM" | bc)
+          echo "Generated Version: $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Release apk
+        continue-on-error: true
         uses: ncipollo/release-action@v1
         with:
-            tag: ${{ github.commit_hash }}
-            name: Release ${{ github.commit_hash }}
-            artifacts: ${{steps.sign_apk.outputs.signedReleaseFile}}
+          tag: ${{ steps.parse_version.outputs.VERSION }}
+          artifacts: ${{steps.sign_app.outputs.signedReleaseFile}}
+          generateReleaseNotes: true
+          makeLatest: true
+          replacesArtifacts: true
